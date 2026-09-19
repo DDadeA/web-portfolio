@@ -1,0 +1,53 @@
+body {
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  margin: 0;
+  padding: 0;
+
+  width: 100vw;
+  height: 70vh;
+
+  /* @media screen and (max-width: 767px) {
+    transform: rotate(90deg) scale(calc(100vh / 100vw));
+  } */
+}
+
+main {
+  margin: 0;
+  padding: 0;
+
+  width: 100vw;
+}
+
+#category-container {
+  display: flex;
+  flex-direction: row;
+  align-items: left;
+
+  padding: 1rem;
+  gap: 1rem;
+
+  /* Make it scrollable if overflow */
+  max-width: 100vw;
+  height: 3rem;
+
+  overflow-x: auto;
+}
+
+.category {
+  color: #333;
+
+  border: 1px solid #ccc;
+  border-radius: 1.5rem;
+  padding: 1rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
