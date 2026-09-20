@@ -14,7 +14,8 @@ uniform vec3 u_pointing;
 
 uniform float u_time;
 
-uniform float IOR;
+uniform float u_IOR;
+uniform float u_lowIOR;
 uniform float u_eps;
 
 in vec2 uv;
@@ -22,8 +23,7 @@ in vec2 uv;
 layout (location = 0) out vec4 out_rayDir;
 layout (location = 1) out vec4 out_normal;
 layout (location = 2) out float out_depth;
-
-layout (location = 3) out vec4 out_cameraRay;
+layout (location = 3) out vec4 out_rayDir_low;
 
 vec3 hash33(vec3 p) {
     p = fract(p * vec3(0.1031, 0.1030, 0.0973));
@@ -166,25 +166,11 @@ vec3 getNormal(vec3 rayPos) {
     return normalize(norm);
 }
 
-void main() {
-    vec3 reference = normalize(u_pointing - u_cameraPos);
 
-    vec3 horizontal = cross(reference, vec3(0.0, 0.0, 1.0)); // z vector is up
-    vec3 vertical = cross(horizontal, reference);
-
-    horizontal = normalize(horizontal) * tan(radians(u_fov) / 2.0);
-    vertical = normalize(vertical) * tan(radians(u_fov) / 2.0) / u_aspectRatio;
-
-    vec3 cameraRay = normalize(reference + (uv.x - 0.5) * 2.0 * horizontal + (uv.y - 0.5) * 2.0 * vertical);
-    out_cameraRay = vec4(cameraRay, 1.0);
-
+vec4 render(vec3 u_cameraPos, vec3 cameraRay, float IOR) {
     vec3 rayPos = u_cameraPos;
     vec3 rayDir = cameraRay;
     float totalDistance = 0.0;
-
-    out_normal = vec4(0.0);
-    out_depth  = 1000.0;
-
 
     for (int i = 0; i < 256; i++) {
         float distance = getDist(rayPos);
@@ -199,8 +185,8 @@ void main() {
 
             
             if (out_normal.a == 0.0) {  // Only for the first hit
-                out_depth = totalDistance; 
-                out_normal = vec4(normal, 1.0);
+                // out_depth = totalDistance; 
+                // out_normal = vec4(normal, 1.0);
             }
 
             // Material hanlding
@@ -208,8 +194,7 @@ void main() {
                 normal += hash33(rayPos) * 0.08; // Add some noise to the normal
             }
             if (material == 3) {
-                out_rayDir = vec4(rayDir, float(material));
-                return;
+                return vec4(rayDir, float(material));
             }
 
             // rayPos += rayDir * (1.0 / dot(rayDir, -normal));
@@ -234,5 +219,25 @@ void main() {
         }
     }
 
-    out_rayDir = vec4(rayDir, 1.0);
+    return vec4(rayDir, 1.0);
+}
+
+void main() {
+    vec3 reference = normalize(u_pointing - u_cameraPos);
+
+    vec3 horizontal = cross(reference, vec3(0.0, 0.0, 1.0)); // z vector is up
+    vec3 vertical = cross(horizontal, reference);
+
+    horizontal = normalize(horizontal) * tan(radians(u_fov) / 2.0);
+    vertical = normalize(vertical) * tan(radians(u_fov) / 2.0) / u_aspectRatio;
+
+    vec3 cameraRay = normalize(reference + (uv.x - 0.5) * 2.0 * horizontal + (uv.y - 0.5) * 2.0 * vertical);
+    out_rayDir_low = vec4(cameraRay, 1.0);
+
+
+    out_normal = vec4(0.0);
+    out_depth  = 1000.0;
+
+    out_rayDir = render(u_cameraPos, cameraRay, u_IOR); // For high IOR
+    // out_rayDir_low = render(u_cameraPos, cameraRay, u_lowIOR); // For low IOR
 }

@@ -1,20 +1,32 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
-        <link rel="stylesheet" href="src/index.css">
-        <script src="src/index.js" defer></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    </head>
-    <body>
-        <header>
-        </header>
+    <link rel="stylesheet" href="src/index.css" />
+    <script src="src/index.js" defer></script>
 
-        <main>
-            <div id="category-container"></div>
-            <div id="content-container"></div>
-        </main>
-    </body>
+    <!-- ONLY FOR DEV -->
+    <!-- 1. Mobile DevTools (Console, Network, Elements, Resources) -->
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+      eruda.init();
+    </script>
+
+    <!-- 2. WebGL State & Draw Call Inspector -->
+    <script src="https://cdn.jsdelivr.net/npm/spectorjs@0.9.33/dist/spector.bundle.js"></script>
+    <script>
+      const spector = new SPECTOR.Spector();
+      spector.displayUI(); // Places a floating capture icon on your mobile screen
+    </script>
+  </head>
+  <body>
+    <header></header>
+
+    <main>
+      <div id="category-container"></div>
+      <div id="content-container"></div>
+    </main>
+  </body>
 </html>

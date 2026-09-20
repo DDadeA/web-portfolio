@@ -21,6 +21,8 @@ canvas.width = width;
 canvas.height = height;
 header.appendChild(canvas);
 
+console.log(width, height);
+
 const gl = canvas.getContext("webgl2");
 
 const ext = gl.getExtension("EXT_color_buffer_float");
@@ -71,27 +73,53 @@ function drawPass(
   twgl.drawBufferInfo(gl, bufferInfo);
 }
 
-const rayMarcherBuffer = twgl.createFramebufferInfo(gl, [
-  betterRGBA, // 3D Ray Direction and material ID
-  { ...betterRGBA, attachmentPoint: gl.COLOR_ATTACHMENT1 }, // Superfical Normal, object hit
-  {
-    internalFormat: gl.R32F,
-    format: gl.RED,
-    type: gl.FLOAT,
-    min: gl.NEAREST,
-    mag: gl.NEAREST,
-    attachmentPoint: gl.COLOR_ATTACHMENT2,
-  },
-  { ...betterRGBA, attachmentPoint: gl.COLOR_ATTACHMENT3 },
-]);
-const rayMarcherBuffer_lights = [
-  twgl.createFramebufferInfo(gl, [betterRGBA]),
-  twgl.createFramebufferInfo(gl, [betterRGBA]),
-  twgl.createFramebufferInfo(gl, [betterRGBA]),
-];
+const rayMarcherBufferUpscale = 1.5;
+
+const rayMarcherBuffer = twgl.createFramebufferInfo(
+  gl,
+  [
+    betterRGBA, // 3D Ray Direction and material ID
+    { ...betterRGBA, attachmentPoint: gl.COLOR_ATTACHMENT1 }, // Superfical Normal, object hit
+    {
+      internalFormat: gl.R32F,
+      format: gl.RED,
+      type: gl.FLOAT,
+      min: gl.NEAREST,
+      mag: gl.NEAREST,
+      attachmentPoint: gl.COLOR_ATTACHMENT2,
+    },
+    { ...betterRGBA, attachmentPoint: gl.COLOR_ATTACHMENT3 }, // For low IOR setup
+  ],
+  width * rayMarcherBufferUpscale,
+  height * rayMarcherBufferUpscale,
+);
+
+const rayMarcherBuffer2 = twgl.createFramebufferInfo(
+  gl,
+  [
+    betterRGBA, // 3D Ray Direction and material ID
+    { ...betterRGBA, attachmentPoint: gl.COLOR_ATTACHMENT1 }, // Superfical Normal, object hit
+    {
+      internalFormat: gl.R32F,
+      format: gl.RED,
+      type: gl.FLOAT,
+      min: gl.NEAREST,
+      mag: gl.NEAREST,
+      attachmentPoint: gl.COLOR_ATTACHMENT2,
+    },
+    { ...betterRGBA, attachmentPoint: gl.COLOR_ATTACHMENT3 }, // For low IOR setup
+  ],
+  width * rayMarcherBufferUpscale,
+  height * rayMarcherBufferUpscale,
+);
 
 const ppBuffers = [twgl.createFramebufferInfo(gl, [betterRGBA])];
-const renderBuffer = twgl.createFramebufferInfo(gl);
+const renderBuffer = twgl.createFramebufferInfo(
+  gl,
+  [{}],
+  width * rayMarcherBufferUpscale,
+  height * rayMarcherBufferUpscale,
+);
 
 const backgroundTexture = twgl.createTexture(gl, {
   src: "src/headers/260906/bg.jpg",
@@ -113,25 +141,6 @@ const cubeMapTexture = twgl.createTexture(gl, {
 const pi_rayMarcher = twgl.createProgramInfo(gl, [
   vs,
   await getFile("src/headers/260906/shaders/rayMarcher.frag"),
-]);
-
-const pi_normalToTexture = twgl.createProgramInfo(gl, [
-  vs,
-  `#version 300 es
-  precision highp float;
-
-  uniform vec2 u_resolution;
-  uniform float u_time;
-  uniform sampler2D u_bgSampler;
-
-  uniform float u_bgSamplerRatio;
-
-  in vec2 uv;
-  out vec4 fragColor;
-  
-  void main() {
-    fragColor = texture(u_bgSampler, uv * vec2(1.0, u_bgSamplerRatio) + vec2(0.0, 1.0 - u_bgSamplerRatio)/2.0);
-  }`,
 ]);
 
 const pi_disperse = twgl.createProgramInfo(gl, [
@@ -190,11 +199,12 @@ function render() {
     u_objectPosition: [0, 0, 0],
 
     u_eps: 1e-4,
-    IOR: 1.3,
+    u_IOR: 1.4,
+    u_lowIOR: 1.2,
   };
 
   drawPass(pi_rayMarcher, uniform, rayMarcherBuffer);
-  drawPass(pi_rayMarcher, { ...uniform, IOR: 1.1 }, rayMarcherBuffer_lights[0]);
+  drawPass(pi_rayMarcher, { ...uniform, u_IOR: 1.2 }, rayMarcherBuffer2);
 
   drawPass(
     pi_disperse,
@@ -204,8 +214,8 @@ function render() {
 
       backgroundSampler: cubeMapTexture,
       highIORSampler: rayMarcherBuffer.attachments[0],
-      // lowIORSampler: rayMarcherBuffer.attachments[3],
-      lowIORSampler: rayMarcherBuffer_lights[0].attachments[0],
+      lowIORSampler: rayMarcherBuffer2.attachments[0],
+      // lowIORSampler: rayMarcherBuffer_lights[0].attachments[0],
     },
     renderBuffer,
   );
