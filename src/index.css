@@ -11,11 +11,12 @@ header {
   padding: 0;
 
   width: 100vw;
-  height: 70vh;
+  height: 100vh;
 
-  /* @media screen and (max-width: 767px) {
-    transform: rotate(90deg) scale(calc(100vh / 100vw));
-  } */
+  /* When ratio over 1:1 */
+  @media (max-aspect-ratio: 1/1) {
+    /* transform: rotate(90deg); */
+  }
 }
 
 main {

@@ -5,20 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <link rel="stylesheet" href="src/index.css" />
-    <script src="src/index.js" defer></script>
 
-    <!-- ONLY FOR DEV -->
+    <!-- FONTS -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Gloock&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- TODO: Remove this in production -->
     <!-- 1. Mobile DevTools (Console, Network, Elements, Resources) -->
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>
-      eruda.init();
-    </script>
-
-    <!-- 2. WebGL State & Draw Call Inspector -->
-    <script src="https://cdn.jsdelivr.net/npm/spectorjs@0.9.33/dist/spector.bundle.js"></script>
-    <script>
-      const spector = new SPECTOR.Spector();
-      spector.displayUI(); // Places a floating capture icon on your mobile screen
+      const url = window.location.href;
+      if (url.includes("localhost") || url.includes("127.0.0.1")) {
+        eruda.init();
+      }
     </script>
   </head>
   <body>
@@ -28,5 +35,6 @@
       <div id="category-container"></div>
       <div id="content-container"></div>
     </main>
+    <script src="src/index.js" defer></script>
   </body>
 </html>
