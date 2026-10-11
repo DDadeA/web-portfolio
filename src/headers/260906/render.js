@@ -78,7 +78,7 @@ function drawPass(
   twgl.setUniforms(programInfo, uniforms);
   twgl.drawBufferInfo(gl, bufferInfo);
 }
-const rayMarcherBufferUpscale = 1.4;
+const rayMarcherBufferUpscale = 1.0;
 const rayMarcherBuffer = twgl.createFramebufferInfo(
   gl,
   [
